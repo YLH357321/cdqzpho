@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>导航页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免点击时选中文字，提升按钮点击体验，不影响功能 */
+        }
+
+        body {
+            /* 优雅的渐变背景，从深邃夜空到柔和暮色 */
+            background: linear-gradient(145deg, #0b2b3f 0%, #1a4a6f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            padding: 20px;
+            /* 确保背景覆盖整个视口，无滚动条异常 */
+        }
+
+        /* 主容器：两个圆形按钮的弹性布局 */
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;          /* 移动端自适应换行，保持居中 */
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;               /* 两个按钮之间的间距，视觉舒适 */
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* 圆形按钮基础样式 */
+        .circle-btn {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,245,0.95), rgba(240,248,255,0.9));
+            backdrop-filter: blur(1px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3), 0 8px 12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            color: #1e2f3a;
+            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            border: 3px solid rgba(255, 242, 210, 0.7);
+            /* 保证内部文字换行优雅 */
+            padding: 1rem;
+            word-break: keep-all;     /* 中文/英文保持单词完整性，但按钮文字少，不影响 */
+            line-height: 1.3;
+            box-sizing: content-box;
+            /* 增加微妙的内阴影，增强立体感 */
+        }
+
+        /* 悬停效果（桌面端）提升交互感，移动端点击会有瞬间效果 */
+        .circle-btn:hover {
+            transform: scale(1.05) translateY(-6px);
+            background: radial-gradient(circle at 40% 35%, #fffef7, #fef7e0);
+            box-shadow: 0 28px 38px rgba(0, 0, 0, 0.4), 0 12px 18px rgba(0, 0, 0, 0.25);
+            border-color: #ffe2a4;
+            color: #0a2f44;
+        }
+
+        /* 点击时的反馈（活动状态） */
+        .circle-btn:active {
+            transform: scale(0.97) translateY(2px);
+            transition: 0.05s linear;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 针对超宽屏幕或极小设备，调整按钮大小保持美观且可点 */
+        @media (max-width: 620px) {
+            .circle-btn {
+                width: 200px;
+                height: 200px;
+                font-size: 1.6rem;
+            }
+            .button-container {
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .circle-btn {
+                width: 170px;
+                height: 170px;
+                font-size: 1.35rem;
+            }
+            .button-container {
+                gap: 1.5rem;
+            }
+        }
+
+        /* 增加一个精致的页脚说明或装饰，提升信息层次（可选）不影响主要功能 */
+        .info-footer {
+            position: fixed;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.75rem;
+            color: rgba(255, 248, 225, 0.7);
+            background: rgba(0,0,0,0.2);
+            width: fit-content;
+            margin: 0 auto;
+            padding: 6px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            font-family: monospace;
+            z-index: 1;
+        }
+        
+        /* 焦点状态更好的可访问性 */
+        .circle-btn:focus-visible {
+            outline: 4px solid #ffd966;
+            outline-offset: 6px;
+            background: radial-gradient(circle at 40% 35%, #fffae9, #fff2cf);
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <!-- 倒计时按钮：指向 countdown 文件夹中的 countdown.html -->
+        <a href="countdown/countdown.html" class="circle-btn" title="前往倒计时工具">
+            倒计时
+        </a>
+        
+        <!-- 当前时间按钮：指向 time 文件夹中的 time.html -->
+        <a href="time/time.html" class="circle-btn" title="查看当前时间">
+            当前时间
+        </a>
+    </div>
+    
+    <!-- 优雅小提示：仅表明目录结构参考，没有干扰 -->
+    <div class="info-footer">
+        📁CDQZPHO
+    </div>
+</body>
+</html>
