@@ -1,0 +1,107 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.back-btn {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    color: #007bff;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+#ranking-list {
+    list-style: none;
+    padding: 0;
+}
+
+.rank-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.rank-item:hover {
+    background-color: #f9f9f9;
+}
+
+.rank-item:last-child {
+    border-bottom: none;
+}
+
+.name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+}
+
+.score {
+    font-size: 20px;
+    font-weight: bold;
+    color: #d4af37;
+}
+
+.details {
+    background-color: #f0f8ff;
+    padding: 15px 20px;
+    margin: 0 20px 15px 20px;
+    border-radius: 5px;
+    display: none;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.good, .bad {
+    margin-bottom: 10px;
+}
+
+.good::before {
+    content: "宜 ";
+    color: #28a745;
+    font-weight: bold;
+}
+
+.bad::before {
+    content: "忌 ";
+    color: #dc3545;
+    font-weight: bold;
+}
