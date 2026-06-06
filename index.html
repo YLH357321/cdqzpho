@@ -2,43 +2,56 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>导航页</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* 避免点击时选中文字，提升按钮点击体验，不影响功能 */
+            user-select: none;
         }
 
         body {
-            /* 优雅的渐变背景，从深邃夜空到柔和暮色 */
             background: linear-gradient(145deg, #0b2b3f 0%, #1a4a6f 100%);
             min-height: 100vh;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
-            padding: 20px;
-            /* 确保背景覆盖整个视口，无滚动条异常 */
+            overflow: hidden; /* 确保无滚动条 */
         }
 
-        /* 主容器：两个圆形按钮的弹性布局 */
+        .header {
+            text-align: center;
+            margin-bottom: 2vh;
+            font-size: calc(2.5rem + 1vw);
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
         .button-container {
             display: flex;
-            flex-wrap: wrap;          /* 移动端自适应换行，保持居中 */
+            flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 3rem;               /* 两个按钮之间的间距，视觉舒适 */
-            max-width: 800px;
+            gap: 3vw;
+            max-width: 90vw;
             width: 100%;
+            flex-grow: 1;
+            min-height: 0;
+            padding: 1vh 0;
         }
 
-        /* 圆形按钮基础样式 */
         .circle-btn {
-            width: 260px;
-            height: 260px;
+            aspect-ratio: 1; /* 保持圆形比例 */
+            width: 22vw;
+            max-width: 260px;
+            min-width: 170px;
             border-radius: 50%;
             background: radial-gradient(circle at 35% 30%, rgba(255,255,245,0.95), rgba(240,248,255,0.9));
             backdrop-filter: blur(1px);
@@ -49,21 +62,17 @@
             text-align: center;
             text-decoration: none;
             font-weight: 700;
-            font-size: 2rem;
+            font-size: calc(1.5rem + 1vw);
             letter-spacing: 2px;
             color: #1e2f3a;
             transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             cursor: pointer;
             border: 3px solid rgba(255, 242, 210, 0.7);
-            /* 保证内部文字换行优雅 */
             padding: 1rem;
-            word-break: keep-all;     /* 中文/英文保持单词完整性，但按钮文字少，不影响 */
             line-height: 1.3;
-            box-sizing: content-box;
-            /* 增加微妙的内阴影，增强立体感 */
+            box-sizing: border-box;
         }
 
-        /* 悬停效果（桌面端）提升交互感，移动端点击会有瞬间效果 */
         .circle-btn:hover {
             transform: scale(1.05) translateY(-6px);
             background: radial-gradient(circle at 40% 35%, #fffef7, #fef7e0);
@@ -72,39 +81,14 @@
             color: #0a2f44;
         }
 
-        /* 点击时的反馈（活动状态） */
         .circle-btn:active {
             transform: scale(0.97) translateY(2px);
             transition: 0.05s linear;
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
         }
 
-        /* 针对超宽屏幕或极小设备，调整按钮大小保持美观且可点 */
-        @media (max-width: 620px) {
-            .circle-btn {
-                width: 200px;
-                height: 200px;
-                font-size: 1.6rem;
-            }
-            .button-container {
-                gap: 2rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .circle-btn {
-                width: 170px;
-                height: 170px;
-                font-size: 1.35rem;
-            }
-            .button-container {
-                gap: 1.5rem;
-            }
-        }
-
-        /* 增加一个精致的页脚说明或装饰，提升信息层次（可选）不影响主要功能 */
         .info-footer {
-            position: fixed;
+            position: absolute;
             bottom: 16px;
             left: 0;
             right: 0;
@@ -122,7 +106,6 @@
             z-index: 1;
         }
         
-        /* 焦点状态更好的可访问性 */
         .circle-btn:focus-visible {
             outline: 4px solid #ffd966;
             outline-offset: 6px;
@@ -131,19 +114,26 @@
     </style>
 </head>
 <body>
+    <div class="header">物理</div>
+    
     <div class="button-container">
-        <!-- 倒计时按钮：指向 countdown 文件夹中的 countdown.html -->
         <a href="countdown/countdown.html" class="circle-btn" title="前往倒计时工具">
             计时器
         </a>
         
-        <!-- 当前时间按钮：指向 time 文件夹中的 time.html -->
         <a href="time/time.html" class="circle-btn" title="查看当前时间">
             当前时间
         </a>
+        
+        <a href="fortune/fortune.html" class="circle-btn" title="查看运势">
+            运势
+        </a>
+        
+        <div class="circle-btn" style="cursor: default;" title="预留按钮">
+            
+        </div>
     </div>
     
-    <!-- 优雅小提示：仅表明目录结构参考，没有干扰 -->
     <div class="info-footer">
         📁CDQZPHO
     </div>
