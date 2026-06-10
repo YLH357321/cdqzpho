@@ -1,6 +1,6 @@
 /**
  * 背景特效模块
- * 提供：动态渐变背景（每小时随机切换）+ 增强泡泡图样
+ * 提供：动态渐变背景（每小时随机切换）+ 整齐排列的六边形网格
  */
 
 // ==================== 动态渐变背景（每小时随机切换） ====================
@@ -84,94 +84,58 @@ function updateRandomBackground() {
     }
 }
 
-// ==================== 增强泡泡图样 ====================
+// ==================== 六边形网格背景 ====================
 
 /**
- * 初始化泡泡背景（增强版：更多样式和动画变化）
+ * 创建整齐排列的六边形网格
  */
-function initBubbles() {
-    const container = document.getElementById('bubbleContainer');
-    if (!container) return;
-    container.innerHTML = '';
+function createHexagonGrid() {
+    const gridContainer = document.getElementById('hexagonGridContainer');
+    if (!gridContainer) return;
     
-    const bubbleCount = 32;  // 增加泡泡数量
+    // 清空现有网格
+    gridContainer.innerHTML = '';
     
-    for (let i = 0; i < bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('bubble');
-        
-        // 随机大小：30px 到 180px
-        const size = Math.random() * 150 + 30;
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        
-        // 随机位置
-        bubble.style.left = `${Math.random() * 100}vw`;
-        bubble.style.top = `${Math.random() * 100}vh`;
-        
-        // 随机动画时长和延迟
-        const duration = 10 + Math.random() * 20;
-        const delay = Math.random() * 10;
-        bubble.style.animation = `floatBubble ${duration}s ${delay}s infinite ease-in-out`;
-        
-        // 随机透明度 0.15 到 0.55
-        bubble.style.opacity = 0.15 + Math.random() * 0.4;
-        
-        // 添加随机旋转起始角度
-        const rotateStart = Math.random() * 360;
-        bubble.style.transform = `rotate(${rotateStart}deg)`;
-        
-        // 为部分泡泡添加内发光效果
-        if (Math.random() > 0.7) {
-            bubble.style.boxShadow = `inset 0 0 25px rgba(255,255,255,0.3), 0 8px 20px rgba(0,0,0,0.15)`;
+    // 计算六边形的大小和间距
+    const hexSize = 40; // 六边形的宽度的一半
+    const hexHeight = hexSize * Math.sqrt(3); // 六边形的高度
+    const hexGap = 5; // 六边形之间的间隙
+    
+    // 计算需要多少列和行来覆盖整个屏幕
+    const cols = Math.ceil(window.innerWidth / (hexSize * 1.5)) + 2;
+    const rows = Math.ceil(window.innerHeight / (hexHeight * 0.75)) + 2;
+    
+    // 生成六边形网格
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const hexagon = document.createElement('div');
+            hexagon.classList.add('hexagon');
+            
+            // 计算位置，交错排列
+            const x = col * hexSize * 1.5;
+            const y = row * hexHeight * 0.75 + (col % 2 === 0 ? 0 : hexHeight * 0.5);
+            
+            hexagon.style.left = `${x}px`;
+            hexagon.style.top = `${y}px`;
+            
+            // 随机透明度
+            const opacity = 0.05 + Math.random() * 0.15;
+            hexagon.style.opacity = opacity;
+            
+            // 随机颜色偏移，使网格更有层次感
+            const hueOffset = Math.floor(Math.random() * 20) - 10;
+            hexagon.style.filter = `hue-rotate(${hueOffset}deg)`;
+            
+            gridContainer.appendChild(hexagon);
         }
-        
-        // 为部分泡泡添加彩色边框光晕
-        if (Math.random() > 0.8) {
-            bubble.style.border = `1px solid rgba(255,255,200,0.25)`;
-        }
-        
-        container.appendChild(bubble);
     }
-    
-    // 定期重新生成部分泡泡，增加动态感（每2分钟替换2-3个泡泡）
-    setInterval(() => {
-        if (!container) return;
-        const bubbles = container.querySelectorAll('.bubble');
-        const replaceCount = Math.min(3, bubbles.length);
-        for (let i = 0; i < replaceCount; i++) {
-            const randomIndex = Math.floor(Math.random() * bubbles.length);
-            const oldBubble = bubbles[randomIndex];
-            if (oldBubble) {
-                const newBubble = document.createElement('div');
-                newBubble.classList.add('bubble');
-                
-                const size = Math.random() * 150 + 30;
-                newBubble.style.width = `${size}px`;
-                newBubble.style.height = `${size}px`;
-                newBubble.style.left = `${Math.random() * 100}vw`;
-                newBubble.style.top = `${Math.random() * 100}vh`;
-                
-                const duration = 10 + Math.random() * 20;
-                const delay = Math.random() * 10;
-                newBubble.style.animation = `floatBubble ${duration}s ${delay}s infinite ease-in-out`;
-                newBubble.style.opacity = 0.15 + Math.random() * 0.4;
-                
-                if (Math.random() > 0.7) {
-                    newBubble.style.boxShadow = `inset 0 0 25px rgba(255,255,255,0.3), 0 8px 20px rgba(0,0,0,0.15)`;
-                }
-                
-                oldBubble.replaceWith(newBubble);
-            }
-        }
-    }, 120000);
 }
 
 /**
- * 手动触发背景更新（供外部调用）
+ * 窗口大小改变时重新生成网格
  */
-function triggerBackgroundUpdate() {
-    updateRandomBackground();
+function onWindowResize() {
+    createHexagonGrid();
 }
 
 // ==================== 初始化 ====================
@@ -183,8 +147,57 @@ updateRandomBackground();
 // 窗口加载时确保背景正确
 window.addEventListener('load', function() {
     applyGradientToBody(currentBgGradient);
-    initBubbles();
+    
+    // 创建六边形网格容器
+    let gridContainer = document.getElementById('hexagonGridContainer');
+    if (!gridContainer) {
+        gridContainer = document.createElement('div');
+        gridContainer.id = 'hexagonGridContainer';
+        gridContainer.style.position = 'fixed';
+        gridContainer.style.top = '0';
+        gridContainer.style.left = '0';
+        gridContainer.style.width = '100%';
+        gridContainer.style.height = '100%';
+        gridContainer.style.pointerEvents = 'none';
+        gridContainer.style.zIndex = '-1';
+        gridContainer.style.overflow = 'hidden';
+        document.body.appendChild(gridContainer);
+    }
+    
+    // 添加CSS样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .hexagon {
+            position: absolute;
+            width: ${80}px;
+            height: ${80 * Math.sqrt(3)}px;
+            background-color: rgba(255, 255, 255, 0.1);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transition: opacity 0.3s ease;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            transition: background 10s ease;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 创建网格
+    createHexagonGrid();
 });
 
+// 监听窗口大小变化
+window.addEventListener('resize', onWindowResize);
+
+/**
+ * 手动触发背景更新（供外部调用）
+ */
+function triggerBackgroundUpdate() {
+    updateRandomBackground();
+}
+
 // 导出全局函数供其他模块使用（如果需要）
-window.triggerBackgroundUpdate = triggerBackgroundUpdate;
+window.triggerBackgroundUpdate = triggerBackgroundUpdate; 
