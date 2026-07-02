@@ -82,6 +82,31 @@ body {
     transform: translateY(-2px);
 }
 
+/* 新增的全屏按钮样式 */
+.fullscreen-btn {
+    position: fixed;
+    top: 20px;
+    left: 180px; /* 与 .back-home-btn 保持一定距离 */
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(0, 0, 0, 0.65);
+    transform: translateY(-2px);
+}
+
 /* 3列弹性布局 */
 .layout-columns {
     display: flex;
