@@ -127,6 +127,7 @@ body {
 
 .column.center-column {
     flex: 1.6;
+    align-items: center;
 }
 
 /* 玻璃卡片 - 乳白色半透明，边框2px */
@@ -153,9 +154,29 @@ body {
 }
 
 .card.center {
-    flex: 1;
-    padding: 36px 48px;
+    flex: none;
+    aspect-ratio: 5 / 5.5;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 32px 40px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 左右倒计时卡片：长方形 */
+.card.left,
+.card.right {
+    aspect-ratio: 32 / 27;
+    flex: none;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    padding: 20px 28px;
 }
 
 /* 卡片标题 - 全部改为白色 */
