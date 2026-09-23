@@ -5,7 +5,7 @@
 
 // 目标日期数组 [月, 日] (年份固定为2026)
 const countdownTargets = [
-    { id: 'countdown-days-competition', targetDate: new Date(2026, 8, 19) },  // 9月19日 43届复赛
+    { id: 'countdown-days-competition', targetDate: new Date(2027, 0, 1) },  // 9月19日 43届复赛
     { id: 'countdown-days-physics', targetDate: new Date(2026, 9, 29) }        // 10月29日 43届决赛
 ];
 
