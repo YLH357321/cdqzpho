@@ -170,7 +170,9 @@ body {
 
 /* 左右倒计时卡片：长方形 */
 .card.left,
-.card.right {
+.card.right,
+.card.extra-1,
+.card.extra-2 {
     aspect-ratio: 32 / 27;
     flex: none;
     width: 100%;
