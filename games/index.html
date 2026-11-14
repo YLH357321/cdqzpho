@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>混乱大枪战</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background: radial-gradient(circle at 50% 18%, #232b33 0%, #11151a 60%, #0a0d10 100%);
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    font-family:'Segoe UI','Poppins','Roboto',system-ui,-apple-system,sans-serif;
+    color:#eef3f7; overflow:hidden;
+  }
+
+  /* 返回主页面按钮（左上角，格式同其它页面） */
+  .back-home{
+    position:fixed; top:24px; left:24px; z-index:100;
+    background:rgba(30,30,30,0.55); border-radius:48px;
+    padding:10px 18px; text-decoration:none;
+    font-weight:600; font-size:0.9rem; color:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    transition:all 0.2s ease;
+    display:flex; align-items:center; gap:8px; letter-spacing:0.5px;
+  }
+  .back-home:hover{ background:rgba(50,50,50,0.85); transform:translateY(-1px); }
+  .back-home:active{ transform:translateY(1px); }
+
+  .title{ font-size:clamp(2.4rem,7vw,4.5rem); font-weight:800; letter-spacing:4px;
+    text-shadow:0 4px 18px rgba(0,0,0,0.6); text-align:center; }
+  .title .accent{ color:#ff6b6b; }
+  .subtitle{ margin-top:10px; color:#9fb3c8; font-size:1rem; letter-spacing:2px; }
+
+  .start-btn{ margin-top:42px; padding:18px 56px; border-radius:60px;
+    background:linear-gradient(135deg,#ff6b6b,#ee5253); color:#fff;
+    font-size:1.4rem; font-weight:700; letter-spacing:3px; text-decoration:none;
+    box-shadow:0 12px 30px rgba(238,82,83,0.4); transition:all 0.2s ease; }
+  .start-btn:hover{ transform:translateY(-3px) scale(1.03); box-shadow:0 18px 40px rgba(238,82,83,0.5); }
+  .start-btn:active{ transform:translateY(1px) scale(0.98); }
+
+  @media (max-width:600px){
+    .back-home{ top:16px; left:16px; padding:6px 14px; font-size:0.8rem; }
+    .start-btn{ padding:16px 44px; font-size:1.2rem; }
+  }
+</style>
+</head>
+<body>
+<a href="../index.html" class="back-home" title="返回主页">← 返回主页</a>
+
+<div class="title">混乱<span class="accent">大枪战</span></div>
+<div class="subtitle">CHAOJI GUN BATTLE</div>
+<a href="game.html" class="start-btn">▶ 开始游戏</a>
+</body>
+</html>

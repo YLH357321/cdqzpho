@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>games</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background:#0a0d10;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Segoe UI','Roboto',system-ui,sans-serif;
+  }
+  #pwd{
+    width:min(70vw,320px); padding:18px 20px; font-size:1.4rem; text-align:center;
+    border:2px solid #2c3e50; border-radius:14px; background:#11151a; color:#eef3f7;
+    outline:none; letter-spacing:3px;
+  }
+  #pwd:focus{ border-color:#3da9fc; }
+</style>
+</head>
+<body>
+<input id="pwd" type="password" autocomplete="off" autofocus placeholder="">
+
+<script>
+"use strict";
+const input = document.getElementById('pwd');
+function check(){
+  if(input.value === 'cdqz'){ window.location.href = 'index.html'; }
+}
+input.addEventListener('input', check);
+input.addEventListener('keydown', e=>{ if(e.key === 'Enter') check(); });
+</script>
+</body>
+</html>
