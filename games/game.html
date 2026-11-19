@@ -2,13 +2,13 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>混乱大枪战</title>
 <style>
   html,body{margin:0;padding:0;overflow:hidden;background:#1a1a1a;}
   #game{display:block;background:#222;cursor:crosshair;touch-action:none;}
 
-  /* 返回主页面按钮（左上角，格式同其它页面） */
+  /* 返回主页面按钮 */
   .back-home{
     position:fixed; top:24px; left:24px; z-index:100;
     background:rgba(20,20,20,0.6); border-radius:48px;
@@ -22,7 +22,7 @@
   .back-home:hover{ background:rgba(40,40,40,0.85); transform:translateY(-1px); }
   .back-home:active{ transform:translateY(1px); }
 
-  /* 底部控制条（暂停 / 买手雷 / 扔手雷） */
+  /* 底部控制条：买地雷加大，支持第三指触摸 */
   .controls{
     position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
     display:flex; gap:10px; z-index:100;
@@ -31,15 +31,82 @@
     background:rgba(20,20,20,0.6); border:1px solid rgba(255,255,255,0.18);
     color:#fff; padding:10px 16px; border-radius:12px; font-size:0.9rem;
     cursor:pointer; font-weight:600; backdrop-filter:blur(4px);
-    transition:all 0.15s ease; letter-spacing:0.5px;
+    transition:all 0.15s ease; letter-spacing:0.5px; touch-action:manipulation;
   }
   .ctrl-btn:hover{ background:rgba(40,40,40,0.85); }
   .ctrl-btn:active{ transform:scale(0.96); }
   .ctrl-btn .k{ opacity:0.6; font-size:0.72rem; margin-left:4px; }
+  #buyBtn{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    border-color:#fcd34d; padding:12px 20px; font-size:1rem;
+    box-shadow:0 4px 14px rgba(245,158,11,0.35);
+  }
+
+  /* ============ 技能商店窗口（每 1000 分触发） ============ */
+  .shop-overlay{
+    position:fixed; inset:0; z-index:300;
+    background:rgba(6,10,16,0.62); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; padding:16px;
+  }
+  .shop-overlay.show{ display:flex; animation:fadeIn .2s ease; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  .shop-panel{
+    width:min(760px,96vw); max-height:92vh; overflow:auto;
+    background:linear-gradient(160deg,#16263a 0%,#0e1620 100%);
+    border:1px solid rgba(252,211,77,0.45); border-radius:22px;
+    box-shadow:0 24px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    padding:26px 24px 20px; color:#eef3f7; text-align:center;
+  }
+  .shop-title{
+    font-size:clamp(1.4rem,4vw,2rem); font-weight:800; letter-spacing:2px;
+    background:linear-gradient(90deg,#fde68a,#f59e0b);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .shop-sub{ margin-top:6px; font-size:0.9rem; color:#9fb3c8; letter-spacing:1px; }
+  .shop-gold{
+    display:inline-block; margin-top:12px; padding:6px 20px; border-radius:40px;
+    background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.4);
+    color:#fcd34d; font-weight:700; font-size:1.05rem;
+  }
+  .shop-items{
+    display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin:22px 0 6px;
+  }
+  .skill-card{
+    flex:1 1 200px; min-width:180px; max-width:230px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+    border-radius:16px; padding:16px 12px; text-align:center;
+    transition:transform .15s ease, border-color .2s, background .2s;
+  }
+  .skill-card:hover{ transform:translateY(-3px); border-color:rgba(252,211,77,0.5); background:rgba(255,255,255,0.07); }
+  .skill-icon{ font-size:2rem; line-height:1; }
+  .skill-name{ margin-top:8px; font-weight:700; font-size:1.05rem; }
+  .skill-desc{ margin-top:6px; font-size:0.8rem; color:#9fb3c8; min-height:34px; line-height:1.4; }
+  .skill-lv{ margin-top:6px; font-size:0.75rem; color:#7dd3fc; }
+  .buy-skill{
+    margin-top:12px; width:100%; padding:9px 0; border:none; border-radius:10px;
+    background:linear-gradient(135deg,#f59e0b,#d97706); color:#241500;
+    font-weight:800; font-size:0.9rem; cursor:pointer; touch-action:manipulation;
+    transition:filter .15s, transform .1s;
+  }
+  .buy-skill:hover{ filter:brightness(1.1); }
+  .buy-skill:active{ transform:scale(0.97); }
+  .buy-skill:disabled{ background:#374151; color:#6b7280; cursor:not-allowed; }
+  .shop-hint{ min-height:20px; margin-top:10px; font-size:0.85rem; color:#fca5a5; }
+  .shop-continue{
+    margin-top:10px; padding:12px 46px; border:none; border-radius:40px;
+    background:linear-gradient(135deg,#3da9fc,#2563eb); color:#fff;
+    font-weight:800; font-size:1.05rem; letter-spacing:2px; cursor:pointer;
+    touch-action:manipulation; box-shadow:0 8px 22px rgba(37,99,235,0.4);
+  }
+  .shop-continue:hover{ filter:brightness(1.1); }
+  .shop-continue:active{ transform:scale(0.98); }
+  .shop-foot{ margin-top:14px; font-size:0.72rem; color:#64748b; }
 
   @media (max-width:600px){
     .back-home{ top:16px; left:16px; padding:6px 14px; font-size:0.8rem; }
     .ctrl-btn{ padding:8px 12px; font-size:0.8rem; }
+    #buyBtn{ padding:10px 15px; font-size:0.9rem; }
+    .shop-panel{ padding:20px 14px 16px; }
   }
 </style>
 </head>
@@ -49,27 +116,69 @@
 
 <div class="controls">
   <button class="ctrl-btn" id="pauseBtn">暂停<span class="k">P</span></button>
-  <button class="ctrl-btn" id="buyBtn">买手雷<span class="k">B·30金</span></button>
-  <button class="ctrl-btn" id="throwBtn">扔手雷<span class="k">G</span></button>
+  <button class="ctrl-btn" id="buyBtn">买地雷 · <span id="mineCostLabel">200</span>金<span class="k">B</span></button>
+  <button class="ctrl-btn" id="throwBtn">放地雷<span class="k">G</span></button>
+</div>
+
+<!-- 技能商店：每 1000 分暂停弹出 -->
+<div class="shop-overlay" id="shopOverlay">
+  <div class="shop-panel">
+    <div class="shop-title">🎁 得分奖励 · 技能商店</div>
+    <div class="shop-sub">每累计 1000 分暂停一次 · 本次为第 <span id="shopRound">1</span> 次</div>
+    <div class="shop-gold">🪙 当前金币 <span id="shopGold">0</span></div>
+
+    <div class="shop-items">
+      <div class="skill-card">
+        <div class="skill-icon">❤️</div>
+        <div class="skill-name">生命强化</div>
+        <div class="skill-desc">血量上限 +10</div>
+        <div class="skill-lv" id="hpLv">已购 0 次 · 上限 100</div>
+        <button class="buy-skill" id="buyHp">500 金币</button>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔫</div>
+        <div class="skill-name">多管炮台</div>
+        <div class="skill-desc">炮管 +2（上限 15 管）</div>
+        <div class="skill-lv" id="barrelLv">已购 0 次 · 当前 1 管</div>
+        <button class="buy-skill" id="buyBarrel">800 金币</button>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-name">高速射击</div>
+        <div class="skill-desc">射速 +20%</div>
+        <div class="skill-lv" id="rateLv">已购 0 次 · 间隔 0.140s</div>
+        <button class="buy-skill" id="buyRate">600 金币</button>
+      </div>
+    </div>
+
+    <div class="shop-hint" id="shopHint"></div>
+    <button class="shop-continue" id="shopContinue">继续游戏 ▶</button>
+    <div class="shop-foot">按 1 / 2 / 3 快捷购买 · 按 Enter / P 继续</div>
+  </div>
 </div>
 
 <script>
 "use strict";
 
-/* ===================== 配置区（以后调细节改这里） ===================== */
+/* ===================== 配置区（调细节改这里） ===================== */
 const CONFIG = {
-  player: { speed:3.8, maxHp:100, r:16, bulletSpeed:9, bulletDmg:12, shootInterval:0.14 },
+  player: { speed:3.8, maxHp:100, r:16, bulletSpeed:9, bulletDmg:12,
+            shootInterval:0.14, barrelSpread:0.07 },
   enemy:  { speed:1.6, maxHp:20, r:16, bulletSpeed:5.5, bulletDmg:5,
             shootIntervalMin:1.0, shootIntervalMax:2.5, shootRange:520 },
   superEnemy: { maxHp:150, bulletDmg:12, speed:1.9,
                 shootIntervalMin:0.6, shootIntervalMax:1.4, shootRange:600, score:50 },
-  spawn:  { interval:1.2, minInterval:0.45 },   // 敌人生成间隔，随时间自动缩短
+  spawn:  { interval:1.2, minInterval:0.45 },
   scorePerKill: 10,
-  killHealEvery: 50,   // 每击毙多少个怪回满血
-  superEvery:    20,   // 每击毙多少个怪刷新一只超级怪
-  // 金币与手雷
-  coin:   { perNormalKill:5, perSuperKill:25, grenadeCost:30, startGrenades:2 },
-  grenade:{ speed:7, fuse:0.9, blastRadius:130, blastDmg:80 },
+  killHealEvery: 50,
+  superEvery:    20,
+  // 金币与地雷（爆炸参数保持不变，仅价格大幅提高）
+  coin:   { perNormalKill:5, perSuperKill:25, mineCost:200, startMines:2 },
+  mine:   { speed:7, fuse:0.9, blastRadius:130, blastDmg:80 },
+  // 技能
+  skill:  { scoreStep:1000, hpCost:500, hpGain:10,
+            barrelCost:800, barrelGain:2, barrelMax:15,
+            rateCost:600, rateMul:1.2, minShootInterval:0.02 },
 };
 
 /* ===================== 基础工具 ===================== */
@@ -83,33 +192,48 @@ const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
 const rand  = (a,b)=> a + Math.random()*(b-a);
 const dist  = (a,b)=> Math.hypot(a.x-b.x, a.y-b.y);
 
+/* 兼容鼠标/触摸的按压绑定（第三指触摸不影响移动/开火摇杆） */
+function bindPress(el, fn){
+  let lastTouch = 0;
+  el.addEventListener('touchstart', e=>{ e.preventDefault(); lastTouch=Date.now(); fn(); }, {passive:false});
+  el.addEventListener('click', ()=>{ if(Date.now()-lastTouch < 700) return; fn(); });
+}
+document.getElementById('mineCostLabel').textContent = CONFIG.coin.mineCost;
+
 /* ===================== 输入 ===================== */
 const keys = {};
 window.addEventListener('keydown', e=>{
   keys[e.code]=true;
-  if(e.code==='KeyR' && state==='over') start();            // 结束后按 R 重开
-  if(e.code==='KeyP' || e.code==='Escape') togglePause();   // 暂停 / 继续
-  if(e.code==='KeyB') buyGrenade();                         // 花金币买手雷
-  if(e.code==='KeyG') throwGrenade();                       // 扔手雷
+  if(state==='over' && e.code==='KeyR'){ start(); return; }
+  if(state==='shop'){
+    if(e.code==='Digit1') buySkill('hp');
+    else if(e.code==='Digit2') buySkill('barrel');
+    else if(e.code==='Digit3') buySkill('rate');
+    else if(e.code==='Enter'||e.code==='KeyP'||e.code==='Escape') closeShop();
+    return;
+  }
+  if(state!=='playing') return;
+  if(e.code==='KeyP' || e.code==='Escape') togglePause();
+  if(e.code==='KeyB') buyMine();
+  if(e.code==='KeyG') deployMine();
 });
 window.addEventListener('keyup', e=> keys[e.code]=false);
 
 const mouse = { x:W/2, y:H/2, down:false };
 canvas.addEventListener('mousemove', e=>{
   const r = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - r.left;
-  mouse.y = e.clientY - r.top;
+  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
 });
 canvas.addEventListener('mousedown', ()=> mouse.down=true);
 window.addEventListener('mouseup',   ()=> mouse.down=false);
 canvas.addEventListener('click', ()=>{
-  if(state==='playing' && paused){ togglePause(); return; } // 暂停时点一下继续
+  if(state==='playing' && paused){ togglePause(); return; }
   if(state!=='playing') start();
 });
 
-/* ---- 触摸操控（虚拟双摇杆：左移动，右瞄准并射击） ---- */
+/* ---- 触摸：左摇杆移动，右摇杆瞄准并射击；买地雷用独立按钮（第三指） ---- */
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints||0) > 0;
-const JOY_R = 60;                                  // 摇杆最大偏移半径
+const JOY_R = 60;
 const joy = {
   left : { active:false, id:null, bx:0, by:0, ox:0, oy:0 },
   right: { active:false, id:null, bx:0, by:0, ox:0, oy:0 },
@@ -132,7 +256,7 @@ function joyEnd(e){
 }
 canvas.addEventListener('touchstart', e=>{
   e.preventDefault();
-  if(state!=='playing'){ start(); return; }          // 菜单/结束界面：点一下即开始
+  if(state!=='playing'){ start(); return; }
   for(const t of e.changedTouches) joyAssign(t);
 }, {passive:false});
 canvas.addEventListener('touchmove', e=>{
@@ -148,14 +272,19 @@ canvas.addEventListener('touchcancel', joyEnd);
 /* ===================== 实体 ===================== */
 let bullets = [];
 let enemies = [];
-let grenadesArr = [];   // 飞行中的手雷
-let explosions = [];    // 爆炸视觉特效
+let minesArr = [];      // 飞行中的地雷
+let explosions = [];
 
 class Player {
   constructor(){ this.reset(); }
   reset(){
     this.x = W/2; this.y = H/2; this.r = CONFIG.player.r;
-    this.hp = CONFIG.player.maxHp; this.angle = 0; this.shootCd = 0;
+    this.maxHp = CONFIG.player.maxHp;
+    this.hp = this.maxHp;
+    this.angle = 0; this.shootCd = 0;
+    this.barrels = 1;
+    this.shootInterval = CONFIG.player.shootInterval;
+    this.hpLevel = 0; this.barrelLevel = 0; this.rateLevel = 0;
   }
   update(dt){
     let dx=0, dy=0;
@@ -168,26 +297,33 @@ class Player {
     this.x = clamp(this.x + dx/len*CONFIG.player.speed, this.r, W-this.r);
     this.y = clamp(this.y + dy/len*CONFIG.player.speed, this.r, H-this.r);
 
-    // 瞄准：触摸右摇杆优先，否则跟随鼠标
     const aimTouch = joy.right.active && Math.hypot(joy.right.ox, joy.right.oy) > 6;
-    if(aimTouch){
-      this.angle = Math.atan2(joy.right.oy, joy.right.ox);
-    } else {
-      this.angle = Math.atan2(mouse.y-this.y, mouse.x-this.x);
-    }
+    if(aimTouch) this.angle = Math.atan2(joy.right.oy, joy.right.ox);
+    else this.angle = Math.atan2(mouse.y-this.y, mouse.x-this.x);
+
     if(this.shootCd>0) this.shootCd-=dt;
     const shooting = mouse.down || aimTouch;
     if(shooting && this.shootCd<=0){
-      bullets.push(new Bullet(this.x, this.y, this.angle,
-                   CONFIG.player.bulletSpeed, 'player', CONFIG.player.bulletDmg));
-      this.shootCd = CONFIG.player.shootInterval;
+      const n = this.barrels, step = CONFIG.player.barrelSpread, span = (n-1)*step/2;
+      for(let i=0;i<n;i++){
+        const a = this.angle - span + i*step;
+        bullets.push(new Bullet(this.x, this.y, a,
+                     CONFIG.player.bulletSpeed, 'player', CONFIG.player.bulletDmg));
+      }
+      this.shootCd = this.shootInterval;
     }
   }
   draw(){
-    ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+    ctx.save(); ctx.translate(this.x,this.y);
     ctx.fillStyle='#3da9fc';
     ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#1b4965'; ctx.fillRect(0,-4,this.r+14,8);   // 枪管
+    const n=this.barrels, step=CONFIG.player.barrelSpread, span=(n-1)*step/2;
+    ctx.fillStyle='#1b4965';
+    for(let i=0;i<n;i++){
+      ctx.save(); ctx.rotate(this.angle - span + i*step);
+      ctx.fillRect(this.r-2, -3, 16, 6);
+      ctx.restore();
+    }
     ctx.restore();
   }
 }
@@ -196,7 +332,6 @@ class Enemy {
   constructor(x,y,isSuper){
     this.x=x; this.y=y; this.r=CONFIG.enemy.r;
     this.super = !!isSuper;
-    // 超级怪更高血量/伤害/速度，但外观与普通怪完全一致（不做特殊标注）
     this.maxHp    = isSuper ? CONFIG.superEnemy.maxHp    : CONFIG.enemy.maxHp;
     this.bulletDmg= isSuper ? CONFIG.superEnemy.bulletDmg : CONFIG.enemy.bulletDmg;
     this.speed    = isSuper ? CONFIG.superEnemy.speed    : CONFIG.enemy.speed;
@@ -205,14 +340,12 @@ class Enemy {
   }
   update(dt){
     const dx=player.x-this.x, dy=player.y-this.y, d=Math.hypot(dx,dy)||1;
-    this.x += dx/d*this.speed;
-    this.y += dy/d*this.speed;
+    this.x += dx/d*this.speed; this.y += dy/d*this.speed;
     this.angle = Math.atan2(dy,dx);
     this.shootCd -= dt;
     const range = this.super ? CONFIG.superEnemy.shootRange : CONFIG.enemy.shootRange;
     if(this.shootCd<=0 && d<range){
-      bullets.push(new Bullet(this.x, this.y, this.angle,
-                   CONFIG.enemy.bulletSpeed, 'enemy', this.bulletDmg));
+      bullets.push(new Bullet(this.x, this.y, this.angle, CONFIG.enemy.bulletSpeed, 'enemy', this.bulletDmg));
       const mn = this.super ? CONFIG.superEnemy.shootIntervalMin : CONFIG.enemy.shootIntervalMin;
       const mx = this.super ? CONFIG.superEnemy.shootIntervalMax : CONFIG.enemy.shootIntervalMax;
       this.shootCd = rand(mn, mx);
@@ -220,11 +353,10 @@ class Enemy {
   }
   draw(){
     ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
-    ctx.fillStyle='#ef476f';   // 与普通怪相同外观，不特殊标注
+    ctx.fillStyle='#ef476f';
     ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#7a1530'; ctx.fillRect(0,-3,this.r+12,6);
     ctx.restore();
-    // 敌人血条
     ctx.fillStyle='#400'; ctx.fillRect(this.x-this.r, this.y-this.r-8, this.r*2, 4);
     ctx.fillStyle='#0f0'; ctx.fillRect(this.x-this.r, this.y-this.r-8, this.r*2*(this.hp/this.maxHp), 4);
   }
@@ -246,12 +378,12 @@ class Bullet {
   }
 }
 
-class Grenade {
+class Mine {
   constructor(x,y,angle){
     this.x=x; this.y=y;
-    this.vx=Math.cos(angle)*CONFIG.grenade.speed;
-    this.vy=Math.sin(angle)*CONFIG.grenade.speed;
-    this.fuse=CONFIG.grenade.fuse; this.dead=false; this.exploded=false;
+    this.vx=Math.cos(angle)*CONFIG.mine.speed;
+    this.vy=Math.sin(angle)*CONFIG.mine.speed;
+    this.fuse=CONFIG.mine.fuse; this.dead=false; this.exploded=false;
   }
   update(dt){
     this.x += this.vx*dt*60; this.y += this.vy*dt*60;
@@ -260,7 +392,7 @@ class Grenade {
   }
   explode(){
     this.exploded=true; this.dead=true;
-    const R=CONFIG.grenade.blastRadius, D=CONFIG.grenade.blastDmg;
+    const R=CONFIG.mine.blastRadius, D=CONFIG.mine.blastDmg;
     for(const e of enemies){
       if(e.hp>0 && dist(this,e) < R){
         e.hp -= D;
@@ -271,39 +403,48 @@ class Grenade {
   }
   draw(){
     ctx.save();
-    ctx.fillStyle='#2ecc71';
-    ctx.beginPath(); ctx.arc(this.x,this.y,7,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#145a32'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#ef4444';
+    ctx.beginPath(); ctx.arc(this.x,this.y,8,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#7f1d1d'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#fca5a5';
+    ctx.beginPath(); ctx.arc(this.x,this.y,3,0,Math.PI*2); ctx.fill();
     ctx.restore();
   }
 }
 
-/* 击毙奖励：加分、加金币、计数、回血 / 刷新超级怪 */
+/* 击毙奖励：加分、加金币、计数、回血 / 刷新超级怪；跨过 1000 分触发商店 */
 function rewardKill(e){
   score += e.super ? CONFIG.superEnemy.score : CONFIG.scorePerKill;
   coins += e.super ? CONFIG.coin.perSuperKill : CONFIG.coin.perNormalKill;
   killCount++;
   if(killCount % CONFIG.superEvery === 0) spawnSuper();
-  if(killCount % CONFIG.killHealEvery === 0) player.hp = CONFIG.player.maxHp;
+  if(killCount % CONFIG.killHealEvery === 0) player.hp = player.maxHp;
+  if(state==='playing' && score >= nextShopScore){
+    while(score >= nextShopScore) nextShopScore += CONFIG.skill.scoreStep;
+    openShop();
+  }
 }
 
 /* ===================== 游戏状态 ===================== */
-let state = 'menu';            // menu | playing | over
+let state = 'menu';            // menu | playing | shop | over
 let player = new Player();
 let score = 0;
-let killCount = 0;             // 已击毙怪数（用于回血 / 刷新超级怪）
+let killCount = 0;
 let spawnTimer = 0;
 let elapsed = 0;
-let coins = 0;                 // 金币（打怪获得，用于买手雷）
-let grenades = CONFIG.coin.startGrenades; // 手雷数量
-let paused = false;            // 暂停状态
+let coins = 0;
+let mines = CONFIG.coin.startMines;
+let paused = false;
+let nextShopScore = CONFIG.skill.scoreStep;
+let shopRound = 0;
 
 function start(){ reset(); state='playing'; }
 function reset(){
-  bullets=[]; enemies=[]; grenadesArr=[]; explosions=[];
+  bullets=[]; enemies=[]; minesArr=[]; explosions=[];
   score=0; killCount=0; spawnTimer=0; elapsed=0;
-  coins=0; grenades=CONFIG.coin.startGrenades; paused=false; player.reset();
-  updatePauseBtn();
+  coins=0; mines=CONFIG.coin.startMines; paused=false;
+  nextShopScore=CONFIG.skill.scoreStep; shopRound=0;
+  player.reset(); updatePauseBtn();
 }
 
 function spawnEnemy(){
@@ -315,7 +456,6 @@ function spawnEnemy(){
   else { x=-20; y=rand(0,H); }
   enemies.push(new Enemy(x,y,false));
 }
-
 function spawnSuper(){
   const side = Math.floor(Math.random()*4);
   let x,y;
@@ -323,44 +463,88 @@ function spawnSuper(){
   else if(side===1){ x=W+20; y=rand(0,H); }
   else if(side===2){ x=rand(0,W); y=H+20; }
   else { x=-20; y=rand(0,H); }
-  enemies.push(new Enemy(x,y,true));   // 超级怪：外观与普通怪一致
+  enemies.push(new Enemy(x,y,true));
 }
 
-/* 扔手雷：朝瞄准方向飞出一颗（需有库存且在进行中） */
-function throwGrenade(){
+/* 地雷操作 */
+function deployMine(){
   if(state!=='playing' || paused) return;
-  if(grenades<=0) return;
-  grenades--;
-  grenadesArr.push(new Grenade(player.x, player.y, player.angle));
+  if(mines<=0) return;
+  mines--; minesArr.push(new Mine(player.x, player.y, player.angle));
 }
-/* 买手雷：消耗金币（30）换 1 颗 */
-function buyGrenade(){
+function buyMine(){
   if(state!=='playing') return;
-  if(coins >= CONFIG.coin.grenadeCost){
-    coins -= CONFIG.coin.grenadeCost;
-    grenades++;
-  }
+  if(coins >= CONFIG.coin.mineCost){ coins -= CONFIG.coin.mineCost; mines++; }
 }
-/* 暂停 / 继续 */
 function togglePause(){
   if(state!=='playing') return;
-  paused = !paused;
-  updatePauseBtn();
+  paused = !paused; updatePauseBtn();
 }
 function updatePauseBtn(){
   const b = document.getElementById('pauseBtn');
   if(b) b.firstChild.nodeValue = paused ? '继续' : '暂停';
 }
 
+/* ===================== 技能商店 ===================== */
+const $ = id=> document.getElementById(id);
+function openShop(){
+  state='shop'; paused=false; shopRound++;
+  $('shopRound').textContent = shopRound;
+  $('shopHint').textContent = '';
+  updateShopUI();
+  $('shopOverlay').classList.add('show');
+}
+function closeShop(){
+  if(state!=='shop') return;
+  $('shopOverlay').classList.remove('show');
+  state='playing';
+}
+function updateShopUI(){
+  $('shopGold').textContent = coins;
+  $('hpLv').textContent = '已购 '+player.hpLevel+' 次 · 上限 '+player.maxHp;
+  $('barrelLv').textContent = '已购 '+player.barrelLevel+' 次 · 当前 '+player.barrels+' 管';
+  $('rateLv').textContent = '已购 '+player.rateLevel+' 次 · 间隔 '+player.shootInterval.toFixed(3)+'s';
+  $('buyHp').disabled = coins < CONFIG.skill.hpCost;
+  $('buyBarrel').disabled = coins < CONFIG.skill.barrelCost || player.barrels >= CONFIG.skill.barrelMax;
+  $('buyRate').disabled = coins < CONFIG.skill.rateCost || player.shootInterval <= CONFIG.skill.minShootInterval+1e-6;
+}
+function buySkill(type){
+  if(state!=='shop') return;
+  const s=CONFIG.skill;
+  if(type==='hp' && coins>=s.hpCost){
+    coins-=s.hpCost; player.maxHp+=s.hpGain; player.hp+=s.hpGain; player.hpLevel++;
+    $('shopHint').style.color='#86efac'; $('shopHint').textContent='❤️ 血量上限 +'+s.hpGain;
+  } else if(type==='barrel' && coins>=s.barrelCost && player.barrels<s.barrelMax){
+    coins-=s.barrelCost; player.barrels=Math.min(s.barrelMax,player.barrels+s.barrelGain); player.barrelLevel++;
+    $('shopHint').style.color='#86efac'; $('shopHint').textContent='🔫 炮管增至 '+player.barrels+' 管';
+  } else if(type==='rate' && coins>=s.rateCost && player.shootInterval>s.minShootInterval+1e-6){
+    coins-=s.rateCost;
+    player.shootInterval=Math.max(s.minShootInterval, player.shootInterval/s.rateMul);
+    player.rateLevel++;
+    $('shopHint').style.color='#86efac'; $('shopHint').textContent='⚡ 射速 +20%';
+  } else {
+    $('shopHint').style.color='#fca5a5'; $('shopHint').textContent='金币不足或已达上限';
+  }
+  updateShopUI();
+}
+
+bindPress($('pauseBtn'), togglePause);
+bindPress($('buyBtn'), buyMine);
+bindPress($('throwBtn'), deployMine);
+bindPress($('buyHp'), ()=> buySkill('hp'));
+bindPress($('buyBarrel'), ()=> buySkill('barrel'));
+bindPress($('buyRate'), ()=> buySkill('rate'));
+bindPress($('shopContinue'), closeShop);
+
+/* ===================== 主循环 ===================== */
 function update(dt){
   elapsed += dt;
   player.update(dt);
   enemies.forEach(e=>e.update(dt));
   bullets.forEach(b=>b.update(dt));
-  grenadesArr.forEach(g=>g.update(dt));
+  minesArr.forEach(g=>g.update(dt));
   explosions.forEach(x=> x.t -= dt);
 
-  // 子弹碰撞抵消：玩家子弹与敌方子弹相遇则互相销毁
   for(const p of bullets){
     if(p.dead || p.owner!=='player') continue;
     for(const e of bullets){
@@ -368,8 +552,6 @@ function update(dt){
       if(dist(p,e) < p.r+e.r){ p.dead=true; e.dead=true; break; }
     }
   }
-
-  // 碰撞检测（子弹 vs 敌人 / 玩家）
   for(const b of bullets){
     if(b.dead) continue;
     if(b.owner==='player'){
@@ -386,10 +568,9 @@ function update(dt){
   }
   bullets = bullets.filter(b=>!b.dead);
   enemies = enemies.filter(e=>e.hp>0);
-  grenadesArr = grenadesArr.filter(g=>!g.dead);
+  minesArr = minesArr.filter(g=>!g.dead);
   explosions = explosions.filter(x=>x.t>0);
 
-  // 生成敌人（随时间提速）
   spawnTimer -= dt;
   const interval = Math.max(CONFIG.spawn.minInterval, CONFIG.spawn.interval - elapsed*0.01);
   if(spawnTimer<=0){ spawnEnemy(); spawnTimer=interval; }
@@ -399,15 +580,15 @@ function update(dt){
 
 /* ===================== 渲染 ===================== */
 function drawHUD(){
-  ctx.fillStyle='#fff'; ctx.font='16px sans-serif'; ctx.textAlign='right';
-  ctx.fillText('HP: '+player.hp+' / '+CONFIG.player.maxHp, W-16, 28);
+  ctx.font='16px sans-serif'; ctx.textAlign='right';
+  ctx.fillStyle='#fff';
+  ctx.fillText('HP: '+player.hp+' / '+player.maxHp, W-16, 28);
   ctx.fillText('得分: '+score, W-16, 52);
-  ctx.fillText('敌人: '+enemies.length, W-16, 76);
-  ctx.fillText('击毙: '+killCount, W-16, 100);
-  ctx.fillStyle='#ffd166';
-  ctx.fillText('金币: '+coins, W-16, 124);
-  ctx.fillStyle='#2ecc71';
-  ctx.fillText('手雷: '+grenades, W-16, 148);
+  ctx.fillText('击毙: '+killCount, W-16, 76);
+  ctx.fillStyle='#ffd166'; ctx.fillText('金币: '+coins, W-16, 100);
+  ctx.fillStyle='#ef4444'; ctx.fillText('地雷: '+mines, W-16, 124);
+  ctx.fillStyle='#7dd3fc'; ctx.fillText('炮管: '+player.barrels+'/'+CONFIG.skill.barrelMax, W-16, 148);
+  ctx.fillStyle='#a78bfa'; ctx.fillText('射速: '+player.shootInterval.toFixed(3)+'s', W-16, 172);
 }
 function drawCenter(text, sub){
   ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,H);
@@ -424,15 +605,12 @@ function drawJoystick(j, color){
 }
 function drawExplosions(){
   for(const x of explosions){
-    const p = 1 - x.t/x.life;
-    const r = x.max * p;
+    const p = 1 - x.t/x.life, r = x.max*p;
     ctx.save();
-    ctx.globalAlpha = (1-p)*0.85;
-    ctx.fillStyle = '#ff9f43';
-    ctx.beginPath(); ctx.arc(x.x, x.y, r, 0, Math.PI*2); ctx.fill();
-    ctx.globalAlpha = (1-p)*0.9;
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(x.x, x.y, r, 0, Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=(1-p)*0.85; ctx.fillStyle='#ff9f43';
+    ctx.beginPath(); ctx.arc(x.x,x.y,r,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=(1-p)*0.9; ctx.strokeStyle='#fff'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(x.x,x.y,r,0,Math.PI*2); ctx.stroke();
     ctx.restore();
   }
 }
@@ -440,14 +618,14 @@ function render(){
   ctx.fillStyle='#222'; ctx.fillRect(0,0,W,H);
   if(state==='menu'){
     const sub = IS_TOUCH
-      ? '点击开始 · 左摇杆移动 · 右摇杆瞄准并射击'
-      : '点击屏幕开始 · WASD移动 · 鼠标瞄准 · 按住射击';
+      ? '点击开始 · 左摇杆移动 · 右摇杆瞄准射击 · 底部按钮买/放地雷'
+      : '点击开始 · WASD移动 · 鼠标瞄准射击 · B买地雷 G放地雷';
     drawCenter('混乱大枪战', sub);
     return;
   }
   enemies.forEach(e=>e.draw());
   bullets.forEach(b=>b.draw());
-  grenadesArr.forEach(g=>g.draw());
+  minesArr.forEach(g=>g.draw());
   drawExplosions();
   player.draw();
   if(IS_TOUCH){
@@ -455,17 +633,11 @@ function render(){
     drawJoystick(joy.right, 'rgba(239,71,111,0.85)');
   }
   drawHUD();
-
   if(paused) drawCenter('已暂停', '按 P / Esc 或点击屏幕继续');
+  if(state==='shop') drawCenter('技能商店', '每 1000 分暂停 · 购买强化后继续');
   if(state==='over') drawCenter('游戏结束', '得分 '+score+' · 点击或按 R 重新开始');
 }
 
-/* ===================== 控制按钮（点击） ===================== */
-document.getElementById('pauseBtn').addEventListener('click', togglePause);
-document.getElementById('buyBtn').addEventListener('click', buyGrenade);
-document.getElementById('throwBtn').addEventListener('click', throwGrenade);
-
-/* ===================== 主循环 ===================== */
 let last = 0;
 function loop(now){
   const dt = Math.min((now-last)/1000, 0.05); last = now;
